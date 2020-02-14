@@ -129,32 +129,37 @@ const updateDept = () => {
 }
  
 const delDept = () => {
-  const query = "SELECT name FROM department ORDER BY name ASC";
+  const query = `SELECT name FROM department left JOIN role ON role.department_id = department.id
+  WHERE role.department_id IS NULL`
   connection.query(query, (err, res) => {
     const depts = [];
     for (var i = 0; i < res.length; i++) {
       depts.push(res[i].name);
     }
-    inquirer
-      .prompt({
-        name: "dept",
-        type: "list",
-        message: "What department would you like to delete?",
-        choices: depts
-      })
-      .then(({ dept }) => {
-            var query = "DELETE FROM department WHERE ?";
-              connection.query(query,
-              { name: dept },
-              (err, res) => {
+    if (depts.length > 0) {
+      inquirer
+        .prompt({
+          name: "dept",
+          type: "list",
+          message: "What department would you like to delete?",
+          choices: depts
+        })
+        .then(({ dept }) => {
+          var query = "DELETE FROM department WHERE ?";
+          connection.query(query,
+            { name: dept },
+            (err, res) => {
               if (err) throw err;
-              console.log(`${dept} department deleted.`);
+              console.log(`${dept} deleted.`);
               runSearch();
             });
-          });
-      });
-  }
-
+        });
+    } else {
+      console.log("No unreferenced departments to delete.")
+      runSearch();
+    }
+  });
+}
 //-------------------------------------------------------------------------------------------
 
   const viewRole = () => {
@@ -214,6 +219,33 @@ const addRole = () => {
               console.log(`Title inserted.`);
               runSearch();
             });
+        });
+      });
+  });
+}
+
+const delRole = () => {
+  const query = "SELECT title FROM role ORDER BY title ASC";
+  connection.query(query, (err, res) => {
+    const titles = [];
+    for (var i = 0; i < res.length; i++) {
+      titles.push(res[i].title);
+    }
+    inquirer
+      .prompt({
+        name: "role",
+        type: "list",
+        message: "What role would you like to delete?",
+        choices: titles
+      })
+      .then(({ role }) => {
+        var query = "DELETE FROM role WHERE ?";
+          connection.query(query,
+          { name: role },
+          (err, res) => {
+          if (err) throw err;
+          console.log(`${role} deleted.`);
+          runSearch();
         });
       });
   });
