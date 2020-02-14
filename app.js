@@ -100,33 +100,33 @@ const updateDept = () => {
     const depts = [];
     for (var i = 0; i < res.length; i++) {
       depts.push(res[i].name);
-    }
-    inquirer
-      .prompt({
-        name: "dept",
-        type: "list",
-        message: "What department would you like to update?",
-        choices: depts
-      })
-      .then(({ dept }) => {
-        inquirer
-          .prompt({
-            name: "newDept",
-            type: "input",
-            message: `Make your change to ${dept}: `
-          }).then(({ newDept }) => {
-            var query = "UPDATE department SET ? WHERE ?";
-              connection.query(query,
-              [{ name: newDept }, { name: dept }],
-              (err, res) => {
-              if (err) throw err;
-              console.log(`${dept} department updated to ${newDept}.`);
-              runSearch();
+          }
+          inquirer
+            .prompt({
+              name: "dept",
+              type: "list",
+              message: "What department would you like to update?",
+              choices: depts
+            })
+            .then(({ dept }) => {
+              inquirer
+                .prompt({
+                  name: "newDept",
+                  type: "input",
+                  message: `Update name of ${dept} department: `
+                }).then(({ newDept }) => {
+                  var query = "UPDATE department SET ? WHERE ?";
+                    connection.query(query,
+                    [{ name: newDept }, { name: dept }],
+                    (err, res) => {
+                    if (err) throw err;
+                    console.log(`${dept} department updated to ${newDept}.`);
+                    runSearch();
+                  });
+                });
             });
-          });
-      });
-  });
-}
+        });
+      }
  
 const delDept = () => {
   const query = `SELECT name FROM department left JOIN role ON role.department_id = department.id
@@ -172,17 +172,9 @@ const delDept = () => {
 
 const addRole = () => {
 
-  const query = "SELECT id, name FROM department ORDER BY name ASC";
+  const query = "SELECT name FROM department ORDER BY name ASC";
   connection.query(query, (err, res) => {
-    var depts = [
-      {
-        id: 0,
-        name: " "
-      }];
-    for (var i = 0; i < res.length; i++) {
-      depts.push(res[i]);
-    }
-
+    var depts = [];
     const roleQuery = [
       {
         name: "title",
@@ -201,7 +193,9 @@ const addRole = () => {
         choices: depts
       }
     ]
-
+    for (var i = 0; i < res.length; i++) {
+      depts.push(res[i]);
+    }
     inquirer
       .prompt(roleQuery)
       .then(({ title, salary, dept }) => {        
@@ -216,7 +210,7 @@ const addRole = () => {
             },
             (err, res) => {
               if (err) throw err;
-              console.log(`Title inserted.`);
+              console.log(`Role ${title} inserted.`);
               runSearch();
             });
         });
@@ -250,63 +244,51 @@ const delRole = () => {
       });
   });
 }
-// const updateRole = () => {
-//   const query = "SELECT name FROM department ORDER BY name ASC";
-//   connection.query(query, (err, res) => {
-//     const depts = [];
-//     for (var i = 0; i < res.length; i++) {
-//       depts.push(res[i].name);
-//     }
-//     inquirer
-//       .prompt({
-//         name: "dept",
-//         type: "list",
-//         message: "What department would you like to update?",
-//         choices: depts
-//       })
-//       .then(({ dept }) => {
-//         inquirer
-//           .prompt({
-//             name: "newDept",
-//             type: "input",
-//             message: `Make your change to ${dept}: `
-//           }).then(({ newDept }) => {
-//             var query = "UPDATE department SET ? WHERE ?";
-//               connection.query(query,
-//               [{ name: newDept }, { name: dept }],
-//               (err, res) => {
-//               if (err) throw err;
-//               console.log(`${dept} department updated to ${newDept}.`);
-//               runSearch();
-//             });
-//           });
-//       });
-//   });
-// }
- 
-// const delRole = () => {
-//   const query = "SELECT name FROM department ORDER BY name ASC";
-//   connection.query(query, (err, res) => {
-//     const depts = [];
-//     for (var i = 0; i < res.length; i++) {
-//       depts.push(res[i].name);
-//     }
-//     inquirer
-//       .prompt({
-//         name: "dept",
-//         type: "list",
-//         message: "What department would you like to delete?",
-//         choices: depts
-//       })
-//       .then(({ dept }) => {
-//             var query = "DELETE FROM department WHERE ?";
-//               connection.query(query,
-//               { name: dept },
-//               (err, res) => {
-//               if (err) throw err;
-//               console.log(`${dept} department deleted.`);
-//               runSearch();
-//             });
-//           });
-//       });
-//   }
+const updateRole = () => {
+  const query = "SELECT title FROM role ORDER BY title ASC";
+  connection.query(query, (err, res) => {
+    const roles = [];
+    for (var i = 0; i < res.length; i++) {
+      roles.push(res[i].title);
+    }
+    inquirer
+      .prompt({
+        name: "role",
+        type: "list",
+        message: "What role would you like to update?",
+        choices: roles
+      })
+      .then(({ role }) => {
+        inquirer
+          .prompt([{
+            name: "newSalary",
+            type: "input",
+            message: `Update the salary for ${role}: `
+          },
+          {
+            name: "newRole",
+            type: "input",
+            message: `Update the title for ${role}: `
+          }]).then(({ newSalary, newRole }) => {
+            const query = "SELECT title, salary FROM role WHERE ?";
+            connection.query(query, { title: role }, (err, res) => {
+              if (!newSalary) {
+                newSalary = res[0].salary;
+              }
+              if (!newRole) {
+                newRole = res[0].title;
+              }
+              var query = "UPDATE role SET ? WHERE ?";
+              connection.query(query,
+                [{ title: newRole, salary: newSalary }, { title: role }],
+                (err, res) => {
+                  if (err) throw err;
+                  console.log(`${role} title updated to ${newRole}.`);
+                  console.log(`${role} salary updated to ${newSalary}.`);
+                  runSearch();
+                });
+            });
+          });
+      });
+  });
+}
