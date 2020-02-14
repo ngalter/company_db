@@ -14,5 +14,14 @@
   "dependencies": {
     "inquirer": "^7.0.4",
     "mysql": "^2.18.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ngalter/hw12-mysql.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ngalter/hw12-mysql/issues"
+  },
+  "homepage": "https://github.com/ngalter/hw12-mysql#readme"
 }
