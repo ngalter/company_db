@@ -14,6 +14,7 @@ connection.connect(err => {
   if (err) throw err;
   runSearch();
 });
+
 const runSearch = () => {
     inquirer
       .prompt({
@@ -235,7 +236,7 @@ const delRole = () => {
       .then(({ role }) => {
         var query = "DELETE FROM role WHERE ?";
           connection.query(query,
-          { name: role },
+          { title: role },
           (err, res) => {
           if (err) throw err;
           console.log(`${role} deleted.`);
