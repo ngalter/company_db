@@ -1,5 +1,11 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+
+const { viewDept } = require('./lib/Department');
+const { addDept } = require('./lib/Department');
+const { updateDept } = require('./lib/Department');
+const { delDept } = require('./lib/Department');
+
 const connection = mysql.createConnection({
   host: "localhost",
   // Your port; if not 3306
@@ -15,6 +21,7 @@ connection.connect(err => {
   runSearch();
 });
 
+// run the cli
 const runSearch = () => {
     inquirer
       .prompt({
@@ -36,16 +43,16 @@ const runSearch = () => {
       .then(({ action }) => {
         switch (action) {
           case "View Departments":
-            viewDept();
+            viewDept(connection, runSearch);
             break;
           case "Add A Department":
-            addDept();
+            addDept(connection, runSearch);
             break;
           case "Update A Department":
-            updateDept();
+            updateDept(connection, runSearch);
             break;
           case "Delete A Department":
-            delDept();
+            delDept(connection, runSearch);
             break;
           case "View Roles":
             viewRole();
@@ -65,105 +72,106 @@ const runSearch = () => {
         }
       });
 };
-  
-const viewDept = () => {
-    const query = "SELECT * FROM department ORDER BY name ASC";
-    connection.query(query, (err, res) => {
-        console.table(res);
-        runSearch();
-    });
-};
 
-const addDept = () => {
-  inquirer
-    .prompt({
-      name: "name",
-      type: "input",
-      message: "Enter Department Name: "
-      })
-      .then(({ name }) => {
-      const query = connection.query(
-        "INSERT INTO department SET ?",
-        {
-          name: name
-        },
-        function (err, res) {
-          if (err) throw err;
-          console.log(`${name} department added.`);
-          runSearch();
-        });
-    });
-}
+// department funcs
+// const viewDept = () => {
+//     const query = "SELECT * FROM department ORDER BY name ASC";
+//     connection.query(query, (err, res) => {
+//         console.table(res);
+//         runSearch();
+//     });
+// };
 
-const updateDept = () => {
-  const query = "SELECT name FROM department ORDER BY name ASC";
-  connection.query(query, (err, res) => {
-    const depts = [];
-    for (var i = 0; i < res.length; i++) {
-      depts.push(res[i].name);
-          }
-          inquirer
-            .prompt({
-              name: "dept",
-              type: "list",
-              message: "What department would you like to update?",
-              choices: depts
-            })
-            .then(({ dept }) => {
-              inquirer
-                .prompt({
-                  name: "newDept",
-                  type: "input",
-                  message: `Update name of ${dept} department: `
-                }).then(({ newDept }) => {
-                  var query = "UPDATE department SET ? WHERE ?";
-                    connection.query(query,
-                    [{ name: newDept }, { name: dept }],
-                    (err, res) => {
-                    if (err) throw err;
-                    console.log(`${dept} department updated to ${newDept}.`);
-                    runSearch();
-                  });
-                });
-            });
-        });
-      }
+// const addDept = () => {
+//   inquirer
+//     .prompt({
+//       name: "name",
+//       type: "input",
+//       message: "Enter Department Name: "
+//       })
+//       .then(({ name }) => {
+//       const query = connection.query(
+//         "INSERT INTO department SET ?",
+//         {
+//           name: name
+//         },
+//         function (err, res) {
+//           if (err) throw err;
+//           console.log(`${name} department added.`);
+//           runSearch();
+//         });
+//     });
+// }
+
+// const updateDept = () => {
+//   const query = "SELECT name FROM department ORDER BY name ASC";
+//   connection.query(query, (err, res) => {
+//     const depts = [];
+//     for (var i = 0; i < res.length; i++) {
+//       depts.push(res[i].name);
+//           }
+//           inquirer
+//             .prompt({
+//               name: "dept",
+//               type: "list",
+//               message: "What department would you like to update?",
+//               choices: depts
+//             })
+//             .then(({ dept }) => {
+//               inquirer
+//                 .prompt({
+//                   name: "newDept",
+//                   type: "input",
+//                   message: `Update name of ${dept} department: `
+//                 }).then(({ newDept }) => {
+//                   var query = "UPDATE department SET ? WHERE ?";
+//                     connection.query(query,
+//                     [{ name: newDept }, { name: dept }],
+//                     (err, res) => {
+//                     if (err) throw err;
+//                     console.log(`${dept} department updated to ${newDept}.`);
+//                     runSearch();
+//                   });
+//                 });
+//             });
+//         });
+//       }
  
-const delDept = () => {
-  const query = `SELECT name FROM department left JOIN role ON role.department_id = department.id
-  WHERE role.department_id IS NULL`
-  connection.query(query, (err, res) => {
-    const depts = [];
-    for (var i = 0; i < res.length; i++) {
-      depts.push(res[i].name);
-    }
-    if (depts.length > 0) {
-      inquirer
-        .prompt({
-          name: "dept",
-          type: "list",
-          message: "What department would you like to delete?",
-          choices: depts
-        })
-        .then(({ dept }) => {
-          var query = "DELETE FROM department WHERE ?";
-          connection.query(query,
-            { name: dept },
-            (err, res) => {
-              if (err) throw err;
-              console.log(`${dept} deleted.`);
-              runSearch();
-            });
-        });
-    } else {
-      console.log("No unreferenced departments to delete.")
-      runSearch();
-    }
-  });
-}
-//-------------------------------------------------------------------------------------------
+// const delDept = () => {
+//   const query = `SELECT name FROM department left JOIN role ON role.department_id = department.id
+//   WHERE role.department_id IS NULL`
+//   connection.query(query, (err, res) => {
+//     const depts = [];
+//     for (var i = 0; i < res.length; i++) {
+//       depts.push(res[i].name);
+//     }
+//     if (depts.length > 0) {
+//       inquirer
+//         .prompt({
+//           name: "dept",
+//           type: "list",
+//           message: "What department would you like to delete?",
+//           choices: depts
+//         })
+//         .then(({ dept }) => {
+//           var query = "DELETE FROM department WHERE ?";
+//           connection.query(query,
+//             { name: dept },
+//             (err, res) => {
+//               if (err) throw err;
+//               console.log(`${dept} deleted.`);
+//               runSearch();
+//             });
+//         });
+//     } else {
+//       console.log("No unreferenced departments to delete.")
+//       runSearch();
+//     }
+//   });
+// }
 
-  const viewRole = () => {
+// role funcs
+const viewRole = () => {
     const query = "SELECT role.id, role.title, role.salary, department.name FROM role INNER JOIN department ON role.department_id = department.id ORDER BY role.title ASC";
     connection.query(query, (err, res) => {
         console.table(res);
