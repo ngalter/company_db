@@ -1,10 +1,13 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
-
 const { viewDept } = require('./lib/Department');
 const { addDept } = require('./lib/Department');
 const { updateDept } = require('./lib/Department');
 const { delDept } = require('./lib/Department');
+const { viewRole } = require('./lib/Role');
+const { addRole } = require('./lib/Role');
+const { updateRole } = require('./lib/Role');
+const { delRole } = require('./lib/Role');
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -55,16 +58,16 @@ const runSearch = () => {
             delDept(connection, runSearch);
             break;
           case "View Roles":
-            viewRole();
+            viewRole(connection, runSearch);
              break;
           case "Add A Role":
-            addRole();
+            addRole(connection, runSearch);
             break;
           case "Update A Role":
-            updateRole();
+            updateRole(connection, runSearch);
             break;
           case "Delete A Role":
-            delRole();
+            delRole(connection, runSearch);
             break;
           case "exit":
             connection.end();
@@ -171,133 +174,133 @@ const runSearch = () => {
 // }
 
 // role funcs
-const viewRole = () => {
-    const query = "SELECT role.id, role.title, role.salary, department.name FROM role INNER JOIN department ON role.department_id = department.id ORDER BY role.title ASC";
-    connection.query(query, (err, res) => {
-        console.table(res);
-        runSearch();
-    });
-};
+// const viewRole = (connection, runSearch) => {
+//     const query = "SELECT role.id, role.title, role.salary, department.name FROM role INNER JOIN department ON role.department_id = department.id ORDER BY role.title ASC";
+//     connection.query(query, (err, res) => {
+//         console.table(res);
+//         runSearch();
+//     });
+// };
 
-const addRole = () => {
+// const addRole = (connection, runSearch) => {
 
-  const query = "SELECT name FROM department ORDER BY name ASC";
-  connection.query(query, (err, res) => {
-    var depts = [];
-    const roleQuery = [
-      {
-        name: "title",
-        type: "input",
-        message: "Enter Role Title: "
-      },
-      {
-        name: "salary",
-        type: "input",
-        message: "Enter Salary: "
-      },
-      {
-        name: "dept",
-        type: "list",
-        message: "What department does this role belong to?",
-        choices: depts
-      }
-    ]
-    for (var i = 0; i < res.length; i++) {
-      depts.push(res[i]);
-    }
-    inquirer
-      .prompt(roleQuery)
-      .then(({ title, salary, dept }) => {        
-        const query = "SELECT id FROM department WHERE ?";
-        connection.query(query, { name: dept }, (err, res) => {
-          const query = "INSERT INTO role SET ?";
-          connection.query(query,
-            {
-              title: title,
-              salary: salary,
-              department_id: res[0].id
-            },
-            (err, res) => {
-              if (err) throw err;
-              console.log(`Role ${title} inserted.`);
-              runSearch();
-            });
-        });
-      });
-  });
-}
+//   const query = "SELECT name FROM department ORDER BY name ASC";
+//   connection.query(query, (err, res) => {
+//     var depts = [];
+//     const roleQuery = [
+//       {
+//         name: "title",
+//         type: "input",
+//         message: "Enter Role Title: "
+//       },
+//       {
+//         name: "salary",
+//         type: "input",
+//         message: "Enter Salary: "
+//       },
+//       {
+//         name: "dept",
+//         type: "list",
+//         message: "What department does this role belong to?",
+//         choices: depts
+//       }
+//     ]
+//     for (var i = 0; i < res.length; i++) {
+//       depts.push(res[i]);
+//     }
+//     inquirer
+//       .prompt(roleQuery)
+//       .then(({ title, salary, dept }) => {        
+//         const query = "SELECT id FROM department WHERE ?";
+//         connection.query(query, { name: dept }, (err, res) => {
+//           const query = "INSERT INTO role SET ?";
+//           connection.query(query,
+//             {
+//               title: title,
+//               salary: salary,
+//               department_id: res[0].id
+//             },
+//             (err, res) => {
+//               if (err) throw err;
+//               console.log(`Role ${title} inserted.`);
+//               runSearch();
+//             });
+//         });
+//       });
+//   });
+// }
 
-const delRole = () => {
-  const query = "SELECT title FROM role ORDER BY title ASC";
-  connection.query(query, (err, res) => {
-    const titles = [];
-    for (var i = 0; i < res.length; i++) {
-      titles.push(res[i].title);
-    }
-    inquirer
-      .prompt({
-        name: "role",
-        type: "list",
-        message: "What role would you like to delete?",
-        choices: titles
-      })
-      .then(({ role }) => {
-        var query = "DELETE FROM role WHERE ?";
-          connection.query(query,
-          { title: role },
-          (err, res) => {
-          if (err) throw err;
-          console.log(`${role} deleted.`);
-          runSearch();
-        });
-      });
-  });
-}
-const updateRole = () => {
-  const query = "SELECT title FROM role ORDER BY title ASC";
-  connection.query(query, (err, res) => {
-    const roles = [];
-    for (var i = 0; i < res.length; i++) {
-      roles.push(res[i].title);
-    }
-    inquirer
-      .prompt({
-        name: "role",
-        type: "list",
-        message: "What role would you like to update?",
-        choices: roles
-      })
-      .then(({ role }) => {
-        inquirer
-          .prompt([{
-            name: "newSalary",
-            type: "input",
-            message: `Update the salary for ${role}: `
-          },
-          {
-            name: "newRole",
-            type: "input",
-            message: `Update the title for ${role}: `
-          }]).then(({ newSalary, newRole }) => {
-            const query = "SELECT title, salary FROM role WHERE ?";
-            connection.query(query, { title: role }, (err, res) => {
-              if (!newSalary) {
-                newSalary = res[0].salary;
-              }
-              if (!newRole) {
-                newRole = res[0].title;
-              }
-              var query = "UPDATE role SET ? WHERE ?";
-              connection.query(query,
-                [{ title: newRole, salary: newSalary }, { title: role }],
-                (err, res) => {
-                  if (err) throw err;
-                  console.log(`${role} title updated to ${newRole}.`);
-                  console.log(`${role} salary updated to ${newSalary}.`);
-                  runSearch();
-                });
-            });
-          });
-      });
-  });
-}
+// const delRole = (connection, runSearch) => {
+//   const query = "SELECT title FROM role ORDER BY title ASC";
+//   connection.query(query, (err, res) => {
+//     const titles = [];
+//     for (var i = 0; i < res.length; i++) {
+//       titles.push(res[i].title);
+//     }
+//     inquirer
+//       .prompt({
+//         name: "role",
+//         type: "list",
+//         message: "What role would you like to delete?",
+//         choices: titles
+//       })
+//       .then(({ role }) => {
+//         var query = "DELETE FROM role WHERE ?";
+//           connection.query(query,
+//           { title: role },
+//           (err, res) => {
+//           if (err) throw err;
+//           console.log(`${role} deleted.`);
+//           runSearch();
+//         });
+//       });
+//   });
+// }
+// const updateRole = (connection, runSearch) => {
+//   const query = "SELECT title FROM role ORDER BY title ASC";
+//   connection.query(query, (err, res) => {
+//     const roles = [];
+//     for (var i = 0; i < res.length; i++) {
+//       roles.push(res[i].title);
+//     }
+//     inquirer
+//       .prompt({
+//         name: "role",
+//         type: "list",
+//         message: "What role would you like to update?",
+//         choices: roles
+//       })
+//       .then(({ role }) => {
+//         inquirer
+//           .prompt([{
+//             name: "newSalary",
+//             type: "input",
+//             message: `Update the salary for ${role}: `
+//           },
+//           {
+//             name: "newRole",
+//             type: "input",
+//             message: `Update the title for ${role}: `
+//           }]).then(({ newSalary, newRole }) => {
+//             const query = "SELECT title, salary FROM role WHERE ?";
+//             connection.query(query, { title: role }, (err, res) => {
+//               if (!newSalary) {
+//                 newSalary = res[0].salary;
+//               }
+//               if (!newRole) {
+//                 newRole = res[0].title;
+//               }
+//               var query = "UPDATE role SET ? WHERE ?";
+//               connection.query(query,
+//                 [{ title: newRole, salary: newSalary }, { title: role }],
+//                 (err, res) => {
+//                   if (err) throw err;
+//                   console.log(`${role} title updated to ${newRole}.`);
+//                   console.log(`${role} salary updated to ${newSalary}.`);
+//                   runSearch();
+//                 });
+//             });
+//           });
+//       });
+//   });
+// }
