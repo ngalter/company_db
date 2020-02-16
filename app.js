@@ -8,6 +8,10 @@ const { viewRole } = require('./lib/Role');
 const { addRole } = require('./lib/Role');
 const { updateRole } = require('./lib/Role');
 const { delRole } = require('./lib/Role');
+const { viewEmp } = require('./lib/Employee');
+const { addEmp } = require('./lib/Employee');
+const { updateEmp } = require('./lib/Employee');
+const { delEmp } = require('./lib/Employee');
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -32,42 +36,58 @@ const runSearch = () => {
         type: "list",
         message: "What would you like to do?",
         choices: [
-          "View Departments",
-          "Add A Department",
-          "Update A Department",
-          "Delete A Department",
-          "View Roles",
-          "Add A Role",
-          "Update A Role",
-          "Delete A Role",
+          "Departments: View",
+          "Departments: Add",
+          "Departments: Update",
+          "Departments: Delete",
+          "Roles: View",
+          "Roles: Add",
+          "Roles: Update",
+          "Roles: Delete",
+          "Employees: View",
+          "Employees: Add",
+          "Employees: Update",
+          "Employees: Delete",
           "exit"
         ]
       })
       .then(({ action }) => {
         switch (action) {
-          case "View Departments":
+          case "Departments: View":
             viewDept(connection, runSearch);
             break;
-          case "Add A Department":
+          case "Departments: Add":
             addDept(connection, runSearch);
             break;
-          case "Update A Department":
+          case "Departments: Update":
             updateDept(connection, runSearch);
             break;
-          case "Delete A Department":
+          case "Departments: Delete":
             delDept(connection, runSearch);
             break;
-          case "View Roles":
+          case "Roles: View":
             viewRole(connection, runSearch);
              break;
-          case "Add A Role":
+          case "Roles: Add":
             addRole(connection, runSearch);
             break;
-          case "Update A Role":
+          case "Roles: Update":
             updateRole(connection, runSearch);
             break;
-          case "Delete A Role":
+          case "Roles: Delete":
             delRole(connection, runSearch);
+            break;
+          case "Employees: View":
+            viewEmp(connection, runSearch);
+             break;
+          case "Employees: Add":
+            addEmp(connection, runSearch);
+            break;
+          case "Employees: Update":
+            updateEmp(connection, runSearch);
+            break;
+          case "Employees: Delete":
+            delEmp(connection, runSearch);
             break;
           case "exit":
             connection.end();
@@ -75,232 +95,3 @@ const runSearch = () => {
         }
       });
 };
-
-// department funcs
-// const viewDept = () => {
-//     const query = "SELECT * FROM department ORDER BY name ASC";
-//     connection.query(query, (err, res) => {
-//         console.table(res);
-//         runSearch();
-//     });
-// };
-
-// const addDept = () => {
-//   inquirer
-//     .prompt({
-//       name: "name",
-//       type: "input",
-//       message: "Enter Department Name: "
-//       })
-//       .then(({ name }) => {
-//       const query = connection.query(
-//         "INSERT INTO department SET ?",
-//         {
-//           name: name
-//         },
-//         function (err, res) {
-//           if (err) throw err;
-//           console.log(`${name} department added.`);
-//           runSearch();
-//         });
-//     });
-// }
-
-// const updateDept = () => {
-//   const query = "SELECT name FROM department ORDER BY name ASC";
-//   connection.query(query, (err, res) => {
-//     const depts = [];
-//     for (var i = 0; i < res.length; i++) {
-//       depts.push(res[i].name);
-//           }
-//           inquirer
-//             .prompt({
-//               name: "dept",
-//               type: "list",
-//               message: "What department would you like to update?",
-//               choices: depts
-//             })
-//             .then(({ dept }) => {
-//               inquirer
-//                 .prompt({
-//                   name: "newDept",
-//                   type: "input",
-//                   message: `Update name of ${dept} department: `
-//                 }).then(({ newDept }) => {
-//                   var query = "UPDATE department SET ? WHERE ?";
-//                     connection.query(query,
-//                     [{ name: newDept }, { name: dept }],
-//                     (err, res) => {
-//                     if (err) throw err;
-//                     console.log(`${dept} department updated to ${newDept}.`);
-//                     runSearch();
-//                   });
-//                 });
-//             });
-//         });
-//       }
- 
-// const delDept = () => {
-//   const query = `SELECT name FROM department left JOIN role ON role.department_id = department.id
-//   WHERE role.department_id IS NULL`
-//   connection.query(query, (err, res) => {
-//     const depts = [];
-//     for (var i = 0; i < res.length; i++) {
-//       depts.push(res[i].name);
-//     }
-//     if (depts.length > 0) {
-//       inquirer
-//         .prompt({
-//           name: "dept",
-//           type: "list",
-//           message: "What department would you like to delete?",
-//           choices: depts
-//         })
-//         .then(({ dept }) => {
-//           var query = "DELETE FROM department WHERE ?";
-//           connection.query(query,
-//             { name: dept },
-//             (err, res) => {
-//               if (err) throw err;
-//               console.log(`${dept} deleted.`);
-//               runSearch();
-//             });
-//         });
-//     } else {
-//       console.log("No unreferenced departments to delete.")
-//       runSearch();
-//     }
-//   });
-// }
-
-// role funcs
-// const viewRole = (connection, runSearch) => {
-//     const query = "SELECT role.id, role.title, role.salary, department.name FROM role INNER JOIN department ON role.department_id = department.id ORDER BY role.title ASC";
-//     connection.query(query, (err, res) => {
-//         console.table(res);
-//         runSearch();
-//     });
-// };
-
-// const addRole = (connection, runSearch) => {
-
-//   const query = "SELECT name FROM department ORDER BY name ASC";
-//   connection.query(query, (err, res) => {
-//     var depts = [];
-//     const roleQuery = [
-//       {
-//         name: "title",
-//         type: "input",
-//         message: "Enter Role Title: "
-//       },
-//       {
-//         name: "salary",
-//         type: "input",
-//         message: "Enter Salary: "
-//       },
-//       {
-//         name: "dept",
-//         type: "list",
-//         message: "What department does this role belong to?",
-//         choices: depts
-//       }
-//     ]
-//     for (var i = 0; i < res.length; i++) {
-//       depts.push(res[i]);
-//     }
-//     inquirer
-//       .prompt(roleQuery)
-//       .then(({ title, salary, dept }) => {        
-//         const query = "SELECT id FROM department WHERE ?";
-//         connection.query(query, { name: dept }, (err, res) => {
-//           const query = "INSERT INTO role SET ?";
-//           connection.query(query,
-//             {
-//               title: title,
-//               salary: salary,
-//               department_id: res[0].id
-//             },
-//             (err, res) => {
-//               if (err) throw err;
-//               console.log(`Role ${title} inserted.`);
-//               runSearch();
-//             });
-//         });
-//       });
-//   });
-// }
-
-// const delRole = (connection, runSearch) => {
-//   const query = "SELECT title FROM role ORDER BY title ASC";
-//   connection.query(query, (err, res) => {
-//     const titles = [];
-//     for (var i = 0; i < res.length; i++) {
-//       titles.push(res[i].title);
-//     }
-//     inquirer
-//       .prompt({
-//         name: "role",
-//         type: "list",
-//         message: "What role would you like to delete?",
-//         choices: titles
-//       })
-//       .then(({ role }) => {
-//         var query = "DELETE FROM role WHERE ?";
-//           connection.query(query,
-//           { title: role },
-//           (err, res) => {
-//           if (err) throw err;
-//           console.log(`${role} deleted.`);
-//           runSearch();
-//         });
-//       });
-//   });
-// }
-// const updateRole = (connection, runSearch) => {
-//   const query = "SELECT title FROM role ORDER BY title ASC";
-//   connection.query(query, (err, res) => {
-//     const roles = [];
-//     for (var i = 0; i < res.length; i++) {
-//       roles.push(res[i].title);
-//     }
-//     inquirer
-//       .prompt({
-//         name: "role",
-//         type: "list",
-//         message: "What role would you like to update?",
-//         choices: roles
-//       })
-//       .then(({ role }) => {
-//         inquirer
-//           .prompt([{
-//             name: "newSalary",
-//             type: "input",
-//             message: `Update the salary for ${role}: `
-//           },
-//           {
-//             name: "newRole",
-//             type: "input",
-//             message: `Update the title for ${role}: `
-//           }]).then(({ newSalary, newRole }) => {
-//             const query = "SELECT title, salary FROM role WHERE ?";
-//             connection.query(query, { title: role }, (err, res) => {
-//               if (!newSalary) {
-//                 newSalary = res[0].salary;
-//               }
-//               if (!newRole) {
-//                 newRole = res[0].title;
-//               }
-//               var query = "UPDATE role SET ? WHERE ?";
-//               connection.query(query,
-//                 [{ title: newRole, salary: newSalary }, { title: role }],
-//                 (err, res) => {
-//                   if (err) throw err;
-//                   console.log(`${role} title updated to ${newRole}.`);
-//                   console.log(`${role} salary updated to ${newSalary}.`);
-//                   runSearch();
-//                 });
-//             });
-//           });
-//       });
-//   });
-// }
