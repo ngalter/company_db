@@ -4,7 +4,7 @@ const { viewDept } = require('./lib/Department');
 const { addDept } = require('./lib/Department');
 const { updateDept } = require('./lib/Department');
 const { delDept } = require('./lib/Department');
-const { deptBudget } = require('./lib/Management');
+const { deptBudget } = require('./lib/Department');
 const { viewRole } = require('./lib/Role');
 const { addRole } = require('./lib/Role');
 const { updateRole } = require('./lib/Role');
@@ -12,6 +12,7 @@ const { delRole } = require('./lib/Role');
 const { viewEmp } = require('./lib/Employee');
 const { addEmp } = require('./lib/Employee');
 const { updateEmp } = require('./lib/Employee');
+const { viewEmpByManager } = require('./lib/Employee');
 const { delEmp } = require('./lib/Employee');
 
 const connection = mysql.createConnection({
@@ -50,6 +51,7 @@ const runSearch = () => {
           "Employees: Add",
           "Employees: Update",
           "Employees: Delete",
+          "Employees: View By Manager",
           "exit"
         ]
       })
@@ -93,6 +95,9 @@ const runSearch = () => {
             break;
           case "Employees: Delete":
             delEmp(connection, runSearch);
+            break;
+          case "Employees: View By Manager":
+            viewEmpByManager(connection, runSearch);
             break;
           case "exit":
             connection.end();
