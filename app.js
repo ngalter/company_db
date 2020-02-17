@@ -4,6 +4,7 @@ const { viewDept } = require('./lib/Department');
 const { addDept } = require('./lib/Department');
 const { updateDept } = require('./lib/Department');
 const { delDept } = require('./lib/Department');
+const { deptBudget } = require('./lib/Management');
 const { viewRole } = require('./lib/Role');
 const { addRole } = require('./lib/Role');
 const { updateRole } = require('./lib/Role');
@@ -40,6 +41,7 @@ const runSearch = () => {
           "Departments: Add",
           "Departments: Update",
           "Departments: Delete",
+          "Departments: View Budgets By Department",
           "Roles: View",
           "Roles: Add",
           "Roles: Update",
@@ -64,6 +66,9 @@ const runSearch = () => {
             break;
           case "Departments: Delete":
             delDept(connection, runSearch);
+            break;
+          case "Departments: View Budgets By Department":
+            deptBudget(connection, runSearch);
             break;
           case "Roles: View":
             viewRole(connection, runSearch);
