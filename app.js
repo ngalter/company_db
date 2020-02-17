@@ -36,6 +36,7 @@ const runSearch = () => {
       .prompt({
         name: "action",
         type: "list",
+        pageSize: 15,
         message: "What would you like to do?",
         choices: [
           "Departments: View",
